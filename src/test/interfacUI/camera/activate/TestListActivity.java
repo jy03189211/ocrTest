@@ -1,0 +1,1 @@
+package test.interfacUI.camera.activate;public class TestListActivity {}
