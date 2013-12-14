@@ -17,6 +17,7 @@
 
 package edu.sfsu.cs.orange.ocr;
 
+
 import edu.sfsu.cs.orange.ocr.BeepManager;
 
 import com.googlecode.tesseract.android.TessBaseAPI;
@@ -65,12 +66,15 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
+import java.security.PublicKey;
+
 
 /**
  * This activity opens the camera and does the actual scanning on a background thread. It draws a
@@ -87,10 +91,10 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
   // Note: These constants will be overridden by any default values defined in preferences.xml.
   
   /** ISO 639-3 language code indicating the default recognition language. */
-  public static final String DEFAULT_SOURCE_LANGUAGE_CODE = "eng";
+  public static final String DEFAULT_SOURCE_LANGUAGE_CODE = "fin";
   
   /** ISO 639-1 language code indicating the default target language for translation. */
-  public static final String DEFAULT_TARGET_LANGUAGE_CODE = "es";
+  public static final String DEFAULT_TARGET_LANGUAGE_CODE = "eng";
   
   /** The default online machine translation service to use. */
   public static final String DEFAULT_TRANSLATOR = "Bing Translator";
@@ -133,7 +137,7 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
   static final String[] CUBE_SUPPORTED_LANGUAGES = { 
     "ara", // Arabic
     "eng", // English
-    "hin" // Hindi
+    "fin"	//Finnish
   };
 
   /** Languages that require Cube, and cannot run using Tesseract. */
@@ -162,7 +166,8 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
   private static final int OPTIONS_COPY_TRANSLATED_TEXT_ID = Menu.FIRST + 1;
   private static final int OPTIONS_SHARE_RECOGNIZED_TEXT_ID = Menu.FIRST + 2;
   private static final int OPTIONS_SHARE_TRANSLATED_TEXT_ID = Menu.FIRST + 3;
-
+  
+  public String finalResultText;
   private CameraManager cameraManager;
   private CaptureActivityHandler handler;
   private ViewfinderView viewfinderView;
@@ -175,7 +180,7 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
   private View cameraButtonView;
   private View resultView;
   private View progressView;
-  private OcrResult lastResult;
+  public OcrResult lastResult;
   private Bitmap lastBitmap;
   private boolean hasSurface;
   private BeepManager beepManager;
@@ -249,6 +254,8 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
    
     ocrResultView = (TextView) findViewById(R.id.ocr_result_text_view);
     registerForContextMenu(ocrResultView);
+    ocrResultView.setClickable(true);
+    
     translationView = (TextView) findViewById(R.id.translation_text_view);
     registerForContextMenu(translationView);
     
@@ -754,13 +761,20 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
     TextView sourceLanguageTextView = (TextView) findViewById(R.id.source_language_text_view);
     sourceLanguageTextView.setText(sourceLanguageReadable);
     TextView ocrResultTextView = (TextView) findViewById(R.id.ocr_result_text_view);
+    ImageButton imageButton=(ImageButton)findViewById(R.id.opencamera);
     ocrResultTextView.setText(ocrResult.getText());
-    Log.d("Debug", ocrResult.getText());
-    ocrResultTextView.setOnClickListener(new OnClickListener() {
+    imageButton.setOnClickListener(new OnClickListener() {
 		
 		@Override
 		public void onClick(View v) {
-			
+			finalResultText=lastResult.getText().toString();
+			Intent returnIntent = new Intent();
+			Log.d("Debug",finalResultText);
+			 returnIntent.putExtra("result",lastResult.getText().toString());
+			 setResult(RESULT_OK,returnIntent);   
+			 Log.d("Debug",lastResult.getText().toString());
+			 finish();			
+
 		}
 	});
     
@@ -1230,4 +1244,11 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
 	    .setPositiveButton( "Done", new FinishListener(this))
 	    .show();
   }
+
+
+
+  
+ 
+  
 }
+
